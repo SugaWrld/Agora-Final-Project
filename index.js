@@ -1,3 +1,4 @@
+ // creating clinet and variables
  var client = AgoraRTC.createClient({
     mode: "rtc",
     codec: "vp8"
@@ -10,9 +11,7 @@
     videoTrackEnabled: true,
     audioTrackEnabled: true
  }
-  
  var remoteUsers = {};
-
  var options = {
     appid: "a6af85f840ef43108491705e2315a857",
     channel: null,
@@ -24,9 +23,9 @@
  var check ={
      password:null
  };
-  
- $("#toCreate").click(function (e) {
 
+// creating clicks and buttons' funtion
+ $("#toCreate").click(function (e) {
     $("#join").prop("disabled", true);
     $("#mic-btn").prop("disabled", true);
     $("#video-btn").prop("disabled", true);
@@ -69,26 +68,8 @@ $("#backBtn").click(function (e) {
     }
     var password = options.channel;
     check.password=createPassword(password);
-
-    console.log("--------------------");
-    console.log(check.password);
     document.getElementById("printPassword").innerHTML = "Channel Password: "+ check.password;
  });
-function createPassword(pass){
-    var num1 = pass.charCodeAt(1);
-    var num2 = pass.charCodeAt(pass.length - 2);
-    pass = pass.toLowerCase();
-    var first = pass.charCodeAt(0)+3;
-    first = String.fromCharCode(first);
-    var half = (pass.length /2);
-    var mid = pass.charCodeAt(half.toPrecision(1))+5;
-    mid = String.fromCharCode(mid);
-    var last = pass.charCodeAt(pass.length-1)+1;
-    last = String.fromCharCode(last);
-    var returnValue =mid+("")+num1+("")+first+("")+num2+("")+last;
-    return returnValue;
-}
-
 $("#join").click(async function (e) {
     e.preventDefault();
     $("#join").attr("disabled", true);
@@ -115,7 +96,6 @@ $("#join").click(async function (e) {
  $("#leave").click(function (e) {
     leave();
  });
-  
  $("#mic-btn").click(function (e) {
     if (localTrackState.audioTrackEnabled) {
         muteAudio();
@@ -123,7 +103,6 @@ $("#join").click(async function (e) {
         unmuteAudio();
     }
  });
-  
  $("#video-btn").click(function (e) {
     if (localTrackState.videoTrackEnabled) {
         muteVideo();
@@ -131,35 +110,25 @@ $("#join").click(async function (e) {
         unmuteVideo();
     }
  })
-  
+
+ //main methods
  async function join() {
     $("#mic-btn").prop("disabled", false);
     $("#video-btn").prop("disabled", false);
-  
-    // add event listener to play remote tracks when remote users join, publish and leave.
     client.on("user-published", handleUserPublished);
     client.on("user-joined", handleUserJoined);
     client.on("user-left", handleUserLeft);
-    // join a channel and create local tracks, we can use Promise.all to run them concurrently
     [options.uid, localTracks.audioTrack, localTracks.videoTrack] = await Promise.all([
-        // join the channel
         client.join(options.appid, options.channel, options.token || null),
-        // create local tracks, using microphone and camera
         AgoraRTC.createMicrophoneAudioTrack(),
         AgoraRTC.createCameraVideoTrack()
     ]);
     showMuteButton();
-    // play local video track
     $("#local-player-name").text(`Username(${options.uname})-ID(${options.uid})`);
     localTracks.videoTrack.play("local-player");
-   
-   
-    //$("#local-player-name").text(`Channel Name: ${options.channel}`);
-    // publish local tracks to channel
     await client.publish(Object.values(localTracks));
     console.log("publish success");
  }
-  
  async function leave() {
     for (trackName in localTracks) {
         var track = localTracks[trackName];
@@ -171,10 +140,8 @@ $("#join").click(async function (e) {
             localTracks[trackName] = undefined;
         }
     }
-    // remove remote users and player views
     remoteUsers = {};
     $("#remote-playerlist").html(``);
-    // leave the channel
     await client.leave();
     $("#local-player-name").text(``);
     $("#local-player-name-nextline").text(``);
@@ -186,27 +153,12 @@ $("#join").click(async function (e) {
     $("#leave").attr("disabled", true);
     document.getElementById("printPassword").innerHTML = "";
     hideMuteButton();
-    
     console.log("client leaves channel success");
  }
-
-function getObjSize(obj) {
-   var size = 0,
-     key;
-   for (key in obj) {
-     if (obj.hasOwnProperty(key)) {
-        size++;
-     }
-   }
-   return size;
- };
-
 async function subscribe(user, mediaType) {
          const uid = user.uid;
-    // subscribe to a remote user
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
-    // if the video wrapper element is not exist, create it.
     if (mediaType === 'video') {
         if ($(`#player-wrapper-${uid}`).length === 0) {
             const player = $(`
@@ -226,47 +178,36 @@ async function subscribe(user, mediaType) {
    }
    else{
       $("#remote-playerlist").append(player);
-   }
-           
+   }  
         }
-        // play the remote video.
         user.videoTrack.play(`player-${uid}`);
     }
     if (mediaType === 'audio') {
         user.audioTrack.play();
     }
 }
-  
- // Handle user joined
  function handleUserJoined(user) {
     const id = user.uid;
     remoteUsers[id] = user;
  }
   
- // Handle user left
  function handleUserLeft(user) {
     const id = user.uid;
     delete remoteUsers[id];
  }
-  
- // Handle user published
  function handleUserPublished(user, mediaType) {
     subscribe(user, mediaType);
  }
-  
- // Hide or show control buttons
 
+ //other methods
  function hideMuteButton() {
     $("#video-btn").css("display", "none");
     $("#mic-btn").css("display", "none");
  }
-  
  function showMuteButton() {
     $("#video-btn").css("display", "inline-block");
     $("#mic-btn").css("display", "inline-block");
  }
-  
- // Mute audio and video
  async function muteAudio() {
     if (!localTracks.audioTrack) return;
     await localTracks.audioTrack.setEnabled(false);
@@ -279,18 +220,39 @@ async function subscribe(user, mediaType) {
     localTrackState.videoTrackEnabled = false;
     $("#video-btn").text("Unmute Video");
  }
-  
- // Unmute audio and video
  async function unmuteAudio() {
     if (!localTracks.audioTrack) return;
     await localTracks.audioTrack.setEnabled(true);
     localTrackState.audioTrackEnabled = true;
     $("#mic-btn").text("Mute Audio");
  }
-  
  async function unmuteVideo() {
     if (!localTracks.videoTrack) return;
     await localTracks.videoTrack.setEnabled(true);
     localTrackState.videoTrackEnabled = true;
     $("#video-btn").text("Mute Video");
  }
+ function createPassword(pass){
+   var num1 = pass.charCodeAt(1);
+   var num2 = pass.charCodeAt(pass.length - 2);
+   pass = pass.toLowerCase();
+   var first = pass.charCodeAt(0)+3;
+   first = String.fromCharCode(first);
+   var half = (pass.length /2);
+   var mid = pass.charCodeAt(half.toPrecision(1))+5;
+   mid = String.fromCharCode(mid);
+   var last = pass.charCodeAt(pass.length-1)+1;
+   last = String.fromCharCode(last);
+   var returnValue =mid+("")+num1+("")+first+("")+num2+("")+last;
+   return returnValue;
+}
+function getObjSize(obj) {
+   var size = 0,
+     key;
+   for (key in obj) {
+     if (obj.hasOwnProperty(key)) {
+        size++;
+     }
+   }
+   return size;
+ };
