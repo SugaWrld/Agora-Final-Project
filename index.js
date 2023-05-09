@@ -13,7 +13,7 @@
  }
  var remoteUsers = {};
  var options = {
-    appid: "a6af85f840ef43108491705e2315a857",
+    appid: "5d563419191940c9a9e919623bbc734a",
     channel: null,
     uid: null,
     uname:null,
@@ -55,7 +55,7 @@ $("#backBtn").click(function (e) {
     $("#create").attr("disabled", true);
     $("#backBtn").attr("disabled", true);
     try {
-        options.appid = "a6af85f840ef43108491705e2315a857";
+        options.appid = "5d563419191940c9a9e919623bbc734a";
         options.channel = $("#channel").val();
         options.uname = $("#userName").val();
 
@@ -75,7 +75,7 @@ $("#join").click(async function (e) {
     $("#join").attr("disabled", true);
     $("#create").attr("disabled", true);
     try {
-        options.appid = "a6af85f840ef43108491705e2315a857";
+        options.appid = "5d563419191940c9a9e919623bbc734a";
         options.channel = $("#channel").val();
         options.uname = $("#userName").val();
         options.upassword = $("#password").val();
